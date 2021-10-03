@@ -1,0 +1,19 @@
+Control                 PIN
+
+Encoder 1               2&3
+Encoder 2               4&5
+
+Switch 1                7
+
+Button 1                6
+Button 2                8
+Button 3                9
+Button 4                11
+Button 5                10
+
+LED Switch              A4
+LED Button 1            A5
+LED Button 2            A3
+LED Button 3            A2
+LED Button 4            A0
+LED Button 5            A1
