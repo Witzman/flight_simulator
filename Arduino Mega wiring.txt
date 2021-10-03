@@ -1,0 +1,14 @@
+Control                       PIN
+Encoder Heading Bug           6&7
+Encoder Heading Adjust        2&3
+Encoder ADF                   4&5
+Encoder NAV 1                 8&9
+Encoder NAV 2                 10&11
+
+Switch Fuel Pump              A0
+Switch Beacon                 A2
+Switch Landing Light          A3
+Switch Taxi Light             A4     
+Switch Nav Light              A5
+Switch Strobe                 A7
+Switch Pitot Heat             A6
