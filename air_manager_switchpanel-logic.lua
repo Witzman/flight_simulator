@@ -1,6 +1,9 @@
 user_prop_bg_id = user_prop_add_boolean("Hide Panel Background", false, "Tick to hide panel background")
 user_prop_knobster = user_prop_add_boolean("Knobster button", false, "Use Knobster button to run starter")
 
+function buttonrelease(position)
+end
+
 --panel images
 if (user_prop_get(user_prop_bg_id)) then
     img_add_fullscreen("sw_panel_text_only2.png")
@@ -8,466 +11,302 @@ else
     img_add_fullscreen("sw_panel1.png")
 end
 
---switches
+-- led switches
 
+function switch_landing_led(position)
+if (position == true) then
+hw_output_set(outp4, true)
+elseif (position == false) then
+hw_output_set(outp4, false)
+end
+end
 
+function switch_strobe_led(position)
+if (position == true) then
+hw_output_set(outp1, true)
+elseif (position == false) then
+hw_output_set(outp1, false)
+end
+end
+
+function switch_nav_led(position)
+if (position == true) then
+hw_output_set(outp2, true)
+elseif (position == false) then
+hw_output_set(outp2, false)
+end
+end
+
+function switch_taxi_led(position)
+if (position == true) then
+hw_output_set(outp3, true)
+elseif (position == false) then
+hw_output_set(outp3, false)
+end
+end
+
+function switch_beacon_led(position)
+if (position == true) then
+hw_output_set(outp5, true)
+elseif (position == false) then
+hw_output_set(outp5, false)
+end
+end
+
+function switch_fuel_led(position)
+if (position == true) then
+hw_output_set(outp6, true)
+elseif (position == false) then
+hw_output_set(outp6, false)
+end
+end
+
+function switch_pitot_led(position)
+if (position == true) then
+hw_output_set(outp9, true)
+elseif (position == false) then
+hw_output_set(outp9, false)
+end
+end
+
+function switch_avion_led(position)
+if (position == true) then
+switch_fuel(position)
+switch_beacon(position)
+switch_landing(position)
+switch_nav(position)
+switch_taxi(position)
+switch_strobe(position)
+switch_pitot(position)
+elseif (position == false) then
+switch_fuel_led(position)
+switch_beacon_led(position)
+switch_landing_led(position)
+switch_nav_led(position)
+switch_taxi_led(position)
+switch_strobe_led(position)
+switch_pitot_led(position) 
+end
+end
+
+function switch_bat_led(position)
+if (position == true) then
+switch_fuel(position)
+switch_beacon(position)
+switch_landing(position)
+switch_nav(position)
+switch_taxi(position)
+switch_strobe(position)
+switch_pitot(position)
+elseif (position == false) then
+switch_fuel_led(position)
+switch_beacon_led(position)
+switch_landing_led(position)
+switch_nav_led(position)
+switch_taxi_led(position)
+switch_strobe_led(position)
+switch_pitot_led(position) 
+end
+end
 
 -- FUEL PUMP SWITCH
-function fuel_pump_click_callback(position)
-    if position == 0 then
-        fsx_event("TOGGLE_ELECT_FUEL_PUMP1")
-    elseif position == 1 then
-        fsx_event("TOGGLE_ELECT_FUEL_PUMP1")
-    end
+function switch_fuel(sw_on)
+if (sw_on == true) then
+fpvalue = 1
+elseif (sw_on == false) then
+fpvalue = 0
 end
-
-fuel_pump_switch_id = switch_add("toggle_off.png", "toggle_on.png", 160,202,63,63,fuel_pump_click_callback)
-
-function new_fuel_pump_switch_pos(sw_on)
-    if sw_on[1] == 0 then
-        switch_set_position(fuel_pump_switch_id, 0)
-    elseif sw_on[1] == 1 then
-        switch_set_position(fuel_pump_switch_id, 1)
-    end
-end    
-
-function new_fuel_pump_switch_pos_fsx(sw_on)
-fphw_pos = hw_switch_get_position(hw_switch_FuelPump)
-fpsw_pos = switch_get_position(fuel_pump_switch_id)
-    sw_on = fif(sw_on, 1, 0)
-    new_fuel_pump_switch_pos({sw_on})
-if (fphw_pos == fpsw_pos) then 
-else
+local fphw_pos = hw_switch_get_position(hw_switch_FuelPump)
+if (fphw_pos == fpvalue) then 
 fsx_event("TOGGLE_ELECT_FUEL_PUMP1")
 end
+switch_fuel_led(sw_on)
 end
 
-
-fsx_variable_subscribe("GENERAL ENG FUEL PUMP SWITCH:1", "Bool", new_fuel_pump_switch_pos_fsx)
-
-
-
-
+fsx_variable_subscribe("GENERAL ENG FUEL PUMP SWITCH:1", "Bool", switch_fuel)
 -- END FUEL PUMP SWITCH
 
 -- BEACON SWITCH
-function beacon_click_callback(position)
-
-    if position == 0 then
-        xpl_dataref_write("sim/cockpit/electrical/beacon_lights_on","INT", 1)
-        fsx_event("TOGGLE_BEACON_LIGHTS")
-        fs2020_event("TOGGLE_BEACON_LIGHTS")
-    elseif position == 1 then
-        xpl_dataref_write("sim/cockpit/electrical/beacon_lights_on","INT", 0)
-        fsx_event("TOGGLE_BEACON_LIGHTS")
-        fs2020_event("TOGGLE_BEACON_LIGHTS")
-    end
+function switch_beacon(sw_on)
+if (sw_on == true) then
+beaconvalue = 0
+elseif (sw_on == false) then
+beaconvalue = 1
 end
-
-beacon_switch_id = switch_add("toggle_off.png", "toggle_on.png", 236,202,63,63,beacon_click_callback)
-
-function new_beacon_switch_pos(sw_on)
-
-    if sw_on == 0 then
-        switch_set_position(beacon_switch_id, 0)
-    elseif sw_on == 1 then
-        switch_set_position(beacon_switch_id, 1)
-    end
-    
-end    
-
-function new_beacon_switch_pos_fsx(sw_on)
-bchw_pos = hw_switch_get_position(hw_switch_beacon)
-bcsw_pos = switch_get_position(beacon_switch_id)
-    sw_on = fif(sw_on, 1, 0)
-    new_beacon_switch_pos(sw_on)
-if (bchw_pos == bcsw_pos) then 
+local beaconhw_pos = hw_switch_get_position(hw_switch_beacon)
+if (beaconhw_pos == beaconvalue) then 
 else
 fsx_event("TOGGLE_BEACON_LIGHTS")
 end
+switch_beacon_led(sw_on)
 end
 
-
-fsx_variable_subscribe("LIGHT BEACON", "Bool", new_beacon_switch_pos_fsx)
-
+fsx_variable_subscribe("LIGHT BEACON", "Bool", switch_beacon)
 -- END BEACON SWITCH
 
+
+
 -- LANDING LIGHT SWITCH
-function landing_click_callback(position)
-
-    if position == 0 then
-        xpl_dataref_write("sim/cockpit/electrical/landing_lights_on","INT",1)
-        fsx_event("LANDING_LIGHTS_ON")
-        fs2020_event("LANDING_LIGHTS_ON")
-    elseif position == 1 then
-        xpl_dataref_write("sim/cockpit/electrical/landing_lights_on","INT",0)
-        fsx_event("LANDING_LIGHTS_OFF")
-        fs2020_event("LANDING_LIGHTS_OFF")
-    end
 
 
+
+function switch_landing(sw_on)
+if (sw_on == true) then
+landingvalue = 0
+elseif (sw_on == false) then
+landingvalue = 1
 end
-
-
-landing_switch_id = switch_add("toggle_off.png", "toggle_on.png", 311,202,63,63,landing_click_callback)
-
-function new_landing_switch_pos(sw_on)
-    if sw_on == 0 then
-        switch_set_position(landing_switch_id,0)
-    elseif  sw_on == 1 then
-        switch_set_position(landing_switch_id,1)
-    end
-end
-
-function new_landing_switch_pos_fsx(sw_on)
-lahw_pos = hw_switch_get_position(hw_switch_landing)
-lasw_pos = switch_get_position(landing_switch_id)
-
-    sw_on = fif(sw_on, 1, 0)
-    new_landing_switch_pos(sw_on)
-if lahw_pos == lasw_pos then
+local landinghw_pos = hw_switch_get_position(hw_switch_landing)
+if (landinghw_pos == landingvalue) then 
 else
-new_landing_switch_pos(sw_on)
+if landinghw_pos == 0 then
+        fsx_event("LANDING_LIGHTS_ON")
+    elseif landinghw_pos == 1 then
+        fsx_event("LANDING_LIGHTS_OFF")
+    end
 end
-   
+switch_landing_led(sw_on)
 end
 
-
-fsx_variable_subscribe("LIGHT LANDING", "Bool", new_landing_switch_pos_fsx)
-
+fsx_variable_subscribe("LIGHT LANDING", "Bool", switch_landing)
 -- END LANDING LIGHT SWITCH
 
+
+
 -- TAXI LIGHT SWITCH
-function taxi_click_callback(position)
-
-    if position == 0 then
-        xpl_dataref_write("sim/cockpit/electrical/taxi_light_on","INT",1)
-        fsx_event("TOGGLE_TAXI_LIGHTS")
-        fs2020_event("TOGGLE_TAXI_LIGHTS")
-    elseif position == 1 then
-        xpl_dataref_write("sim/cockpit/electrical/taxi_light_on","INT",0)
-        fsx_event("TOGGLE_TAXI_LIGHTS")
-        fs2020_event("TOGGLE_TAXI_LIGHTS")
-    end
+function switch_taxi(sw_on)
+if (sw_on == true) then
+taxivalue = 0
+elseif (sw_on == false) then
+taxivalue = 1
 end
-
-taxi_switch_id = switch_add("toggle_off.png", "toggle_on.png",387,202,63,63, taxi_click_callback)
-
-function new_taxi_switch_pos(sw_on)
-
-    if sw_on == 0 then
-        switch_set_position(taxi_switch_id,0)
-    elseif  sw_on == 1 then
-        switch_set_position(taxi_switch_id,1)
-    end
-
-end    
-
-function new_taxi_switch_pos_fsx(sw_on)
-tahw_pos = hw_switch_get_position(hw_switch_taxi)
-tasw_pos = switch_get_position(taxi_switch_id)
-
-    sw_on = fif(sw_on, 1, 0)
-    new_taxi_switch_pos(sw_on)
-    
-if tahw_pos == tasw_pos then 
+local taxihw_pos = hw_switch_get_position(hw_switch_taxi)
+if (taxihw_pos == taxivalue) then 
 else
 fsx_event("TOGGLE_TAXI_LIGHTS")
 end
+switch_taxi_led(sw_on)
 end
 
-xpl_dataref_subscribe("sim/cockpit/electrical/taxi_light_on","INT", new_taxi_switch_pos)
-fsx_variable_subscribe("LIGHT TAXI", "Bool", new_taxi_switch_pos_fsx)
-fs2020_variable_subscribe("LIGHT TAXI", "Bool", new_taxi_switch_pos_fsx)
+
+fsx_variable_subscribe("LIGHT TAXI", "Bool", switch_taxi)
+
 -- END TAXI LIGHT SWITCH
 
 -- NAV LIGHTS SWITCH
-function nav_click_callback(position)
-
-    if position == 0 then
-        xpl_dataref_write("sim/cockpit/electrical/nav_lights_on","INT",1)
-        fsx_event("TOGGLE_NAV_LIGHTS")
-        fs2020_event("TOGGLE_NAV_LIGHTS")
-    elseif position == 1 then
-        xpl_dataref_write("sim/cockpit/electrical/nav_lights_on","INT",0)
-        fsx_event("TOGGLE_NAV_LIGHTS")
-        fs2020_event("TOGGLE_NAV_LIGHTS")
-    end
-
+function switch_nav(sw_on)
+if (sw_on == true) then
+navvalue = 0
+elseif (sw_on == false) then
+navvalue = 1
 end
-
-nav_switch_id = switch_add("toggle_off.png", "toggle_on.png", 463,202,63,63,nav_click_callback)
-
-function new_nav_switch_pos(sw_on)
-
-    if sw_on == 0 then
-        switch_set_position(nav_switch_id,0)
-    elseif  sw_on == 1 then
-        switch_set_position(nav_switch_id,1)
-    end
-
-end    
-
-function new_nav_switch_pos_fsx(sw_on)
-nahw_pos = hw_switch_get_position(hw_switch_nav)
-nasw_pos = switch_get_position(nav_switch_id)
-    sw_on = fif(sw_on, 1, 0)
-    new_nav_switch_pos(sw_on)
-    
-if (nahw_pos == nasw_pos) then 
+local navhw_pos = hw_switch_get_position(hw_switch_nav)
+if (navhw_pos == navvalue) then 
 else
 fsx_event("TOGGLE_NAV_LIGHTS")
 end
-
+switch_nav_led(sw_on)
 end
 
-xpl_dataref_subscribe("sim/cockpit/electrical/nav_lights_on","INT", new_nav_switch_pos)
-fsx_variable_subscribe("LIGHT NAV", "Bool", new_nav_switch_pos_fsx)
-fs2020_variable_subscribe("LIGHT NAV", "Bool", new_nav_switch_pos_fsx)
+fsx_variable_subscribe("LIGHT NAV", "Bool", switch_nav)
 -- END NAV LIGHTS SWITCH
 
 -- STROBE SWITCH
-function strobe_click_callback(position)
-
-    if position == 0 then
-        xpl_dataref_write("sim/cockpit/electrical/strobe_lights_on","INT",1)
+function switch_strobe(sw_on)
+if (sw_on == true) then
+strobevalue = 0
+elseif (sw_on == false) then
+strobevalue = 1
+end
+local strobehw_pos = hw_switch_get_position(hw_switch_strobe)
+if (strobehw_pos == strobevalue) then 
+else
+if strobehw_pos == 0 then
         fsx_event("STROBES_ON")
-        fs2020_event("STROBES_ON")
-    elseif position == 1 then
-        xpl_dataref_write("sim/cockpit/electrical/strobe_lights_on","INT",0)
+    elseif strobehw_pos == 1 then
         fsx_event("STROBES_OFF")
-        fs2020_event("STROBES_OFF")
     end
 end
-
-strobe_switch_id = switch_add("toggle_off.png", "toggle_on.png", 539,202,63,63,strobe_click_callback)
-
-function new_strobe_switch_pos(sw_on)
-    if sw_on == 0 then
-        switch_set_position(strobe_switch_id,0)
-    elseif  sw_on == 1 then
-        switch_set_position(strobe_switch_id,1)
-    end
-end    
-
-
-function new_strobe_switch_pos_fsx(sw_on)
-sthw_pos = hw_switch_get_position(hw_switch_strobe)
-stsw_pos = switch_get_position(strobe_switch_id)
-    sw_on = fif(sw_on, 1, 0)
-    new_strobe_switch_pos(sw_on)
-    if sthw_pos == stsw_pos then
-    else
-new_strobe_switch_pos(sthw_pos)
-end
+switch_strobe_led(sw_on)
 end
 
-xpl_dataref_subscribe("sim/cockpit/electrical/strobe_lights_on","INT", new_strobe_switch_pos)
-fsx_variable_subscribe("LIGHT STROBE", "Bool", new_strobe_switch_pos_fsx)
-fs2020_variable_subscribe("LIGHT STROBE", "Bool", new_strobe_switch_pos_fsx)
+
+
+
+fsx_variable_subscribe("LIGHT STROBE", "Bool", switch_strobe)
 -- END STROBE SWITCH
 
 -- PITOT HEAT SWITCH
-function pitot_click_callback(position)
-
-    if position == 0 then
-        xpl_dataref_write("sim/cockpit/switches/pitot_heat_on","INT",1)
-        fsx_event("PITOT_HEAT_ON")
-        fs2020_event("PITOT_HEAT_ON")
-    elseif position == 1 then
-        xpl_dataref_write("sim/cockpit/switches/pitot_heat_on","INT",0)
-        fsx_event("PITOT_HEAT_OFF")
-        fs2020_event("PITOT_HEAT_OFF")
-    end
-
+function switch_pitot(sw_on)
+if (sw_on == true) then
+pitotvalue = 0
+elseif (sw_on == false) then
+pitotvalue = 1
 end
-
-
-
-pitot_switch_id = switch_add("toggle_off.png", "toggle_on.png", 558,60,63,63,pitot_click_callback)
-
-function new_pitot_switch_pos(sw_on)
-
-    if sw_on == 0 then
-        switch_set_position(pitot_switch_id,0)
-    elseif  sw_on == 1 then
-        switch_set_position(pitot_switch_id,1)
-    end
-
-end    
-
-function new_pitot_switch_pos_fsx(sw_on)
-
-    sw_on = fif(sw_on, 1, 0)
-    new_pitot_switch_pos(sw_on)
-pihw_pos = hw_switch_get_position(hw_switch_pitot)
-pisw_pos = switch_get_position(pitot_switch_id)
-
-if pihw_pos == pisw_pos then
+local pitothw_pos = hw_switch_get_position(hw_switch_pitot)
+if (pitothw_pos == pitotvalue) then 
 else
-new_pitot_switch_pos(pihw_pos)
+if pitothw_pos == 0 then
+        fsx_event("PITOT_HEAT_ON")
+    elseif pitothw_pos == 1 then
+        fsx_event("PITOT_HEAT_OFF")
+    end
+end
+switch_pitot_led(sw_on)
 end
 
-end
+fsx_variable_subscribe("PITOT HEAT", "Bool", switch_pitot)
 
-xpl_dataref_subscribe("sim/cockpit/switches/pitot_heat_on","INT", new_pitot_switch_pos)
-fsx_variable_subscribe("PITOT HEAT", "Bool", new_pitot_switch_pos_fsx)
-fs2020_variable_subscribe("PITOT HEAT", "Bool", new_pitot_switch_pos_fsx)
 -- END PITOT HEAT SWITCH
 
--- ALTERNATOR SWITCH
-function alt_click_callback(position)
 
-    if position == 0 then
-        xpl_command("sim/electrical/generators_toggle")
-        fsx_event("TOGGLE_MASTER_ALTERNATOR")
-        fs2020_event("TOGGLE_MASTER_ALTERNATOR")
-        if (not battery_sw_on) then fsx_event("TOGGLE_MASTER_BATTERY") end
-    elseif position == 1 then
-        xpl_command("sim/electrical/generators_toggle")
-        fsx_event("TOGGLE_MASTER_ALTERNATOR")
-        fs2020_event("TOGGLE_MASTER_ALTERNATOR")
-    end
 
-end
 
-alt_switch_id = switch_add("master_left_off.png", "master_left_on.png",237,24,58,130,alt_click_callback)
-
-function new_alt_switch_pos(alt_on)
-
-    if alt_on[1] == 0 then
-        switch_set_position(alt_switch_id, 0)
-    elseif alt_on[1] == 1 then
-        switch_set_position(alt_switch_id, 1)
-    end
-
-end    
-
-function new_alt_switch_pos_fsx(alt_on)
-
-    new_alt_switch_pos({fif(alt_on, 1, 0)})
-    
-end
-
-xpl_dataref_subscribe("sim/cockpit/electrical/generator_on", "INT[8]", new_alt_switch_pos)
-fsx_variable_subscribe("GENERAL ENG GENERATOR SWITCH:1", "Bool", new_alt_switch_pos_fsx)
-fs2020_variable_subscribe("GENERAL ENG MASTER ALTERNATOR", "Bool", new_alt_switch_pos_fsx)
--- END ALTERNATOR SWITCH
 
 
 -- BATTERY SWITCH
-function bat_click_callback(position)
-
-    if position == 0 then
-        xpl_dataref_write("sim/cockpit/electrical/battery_on", "INT", 1)
-        fsx_event("TOGGLE_MASTER_BATTERY")
-        fs2020_event("TOGGLE_MASTER_BATTERY")
-    elseif position == 1 then
-        xpl_dataref_write("sim/cockpit/electrical/battery_on", "INT", 0)
-        fsx_event("TOGGLE_MASTER_BATTERY")
-        fs2020_event("TOGGLE_MASTER_BATTERY")
-    end
-
+function switch_bat(sw_on)
+if (sw_on == true) then
+batvalue = 0
+elseif (sw_on == false) then
+batvalue = 1
+end
+local bathw_pos = hw_switch_get_position(hw_switch_batt)
+if (bathw_pos == batvalue) then 
+else
+fsx_event("TOGGLE_MASTER_ALTERNATOR")
+fsx_event("TOGGLE_MASTER_BATTERY")
+end
+switch_bat_led(sw_on)
 end
 
-bat_switch_id = switch_add("master_right_off.png", "master_right_on.png",295,24,58,130,bat_click_callback)
+fsx_variable_subscribe("ELECTRICAL MASTER BATTERY", "Bool", switch_bat)
+fsx_variable_subscribe("GENERAL ENG GENERATOR SWITCH:1", "Bool", switch_bat)
+fsx_variable_subscribe("ELECTRICAL MASTER BATTERY", "Bool", switch_bat)
 
-function new_bat_switch_pos(sw_on)
-
-    if sw_on == 0 then
-        switch_set_position(bat_switch_id, 0)
-    elseif sw_on == 1 then
-        switch_set_position(bat_switch_id, 1)
-    end
-
-end    
-
-function new_bat_switch_pos_fsx(sw_on)
-
-    new_bat_switch_pos(fif(sw_on, 1, 0) )
-    battery_sw_on = sw_on
-end
-
-xpl_dataref_subscribe("sim/cockpit/electrical/battery_on", "INT", new_bat_switch_pos)
-fsx_variable_subscribe("ELECTRICAL MASTER BATTERY", "Bool", new_bat_switch_pos_fsx)
-fs2020_variable_subscribe("ELECTRICAL MASTER BATTERY", "Bool", new_bat_switch_pos_fsx)
 -- END BATTERY SWITCH
 
 -- AVIONICS MASTER SWITCH
-function avion_click_callback(position)
-
-    if position == 0 then
-        xpl_dataref_write("sim/cockpit/electrical/avionics_on", "INT", 1)
-        fsx_event("TOGGLE_AVIONICS_MASTER")
-        fs2020_event("AVIONICS_MASTER_SET", 1)
-    elseif position == 1 then
-        xpl_dataref_write("sim/cockpit/electrical/avionics_on", "INT", 0)
-        fsx_event("TOGGLE_AVIONICS_MASTER")
-        fs2020_event("AVIONICS_MASTER_SET", 0)
-    end
-
+function switch_avion(sw_on)
+if (sw_on == true) then
+avionvalue = 0
+elseif (sw_on == false) then
+avionvalue = 1
+end
+local avionhw_pos = hw_switch_get_position(hw_switch_avion)
+if (avionhw_pos == avionvalue) then 
+else
+fsx_event("TOGGLE_AVIONICS_MASTER")
+end
+switch_avion_led(sw_on)
 end
 
-avion_switch_id = switch_add("white_ver_left_off.png", "white_ver_left_on.png",386,24,58,130,avion_click_callback)
 
-function new_avion_switch_pos(sw_on)
-
-    if sw_on == 0 then
-        switch_set_position(avion_switch_id, 0)
-    elseif  sw_on == 1 then
-        switch_set_position(avion_switch_id, 1)
-    end
-
-end    
-
-function new_avion_switch_pos_fsx(sw_on)
-
-    new_avion_switch_pos(fif(sw_on, 1, 0) )
-    
-end
-
-xpl_dataref_subscribe("sim/cockpit/electrical/avionics_on", "INT", new_avion_switch_pos)
-fsx_variable_subscribe("AVIONICS MASTER SWITCH", "Bool", new_avion_switch_pos_fsx)
-fs2020_variable_subscribe("AVIONICS MASTER SWITCH", "Bool", new_avion_switch_pos_fsx)
+fsx_variable_subscribe("AVIONICS MASTER SWITCH", "Bool", switch_avion)
+fsx_variable_subscribe("AVIONICS MASTER SWITCH", "Bool", switch_avion)
 -- END AVIONICS MASTER SWITCH
 
 
--- X-TIE SWITCH
-function xtie_click_callback(position)
-
-    if position == 0 then
-        xpl_dataref_write("sim/cockpit2/electrical/cross_tie", "INT", 1)
-        fsx_event("TOGGLE_AVIONICS_MASTER")
-        fs2020_event("TOGGLE_AVIONICS_MASTER")
-    elseif position == 1 then
-        xpl_dataref_write("sim/cockpit2/electrical/cross_tie", "INT", 0)
-        fsx_event("TOGGLE_AVIONICS_MASTER")
-        fs2020_event("TOGGLE_AVIONICS_MASTER")
-    end
-
-end
-
-xtie_switch_id = switch_add("white_ver_right_off.png", "white_ver_right_on.png",444,24,58,130,xtie_click_callback)
-
-function new_xtie_switch_pos(sw_on)
-
-    if sw_on == 0 then
-        switch_set_position(xtie_switch_id, 0)
-    elseif  sw_on == 1 then
-        switch_set_position(xtie_switch_id, 1)
-    end
-
-end    
-
-function new_xtie_switch_pos_fsx(sw_on)
-
-    new_xtie_switch_pos(fif(sw_on, 1, 0) )
-    
-end
-
-xpl_dataref_subscribe("sim/cockpit2/electrical/cross_tie", "INT", new_xtie_switch_pos)
-fsx_variable_subscribe("AVIONICS MASTER SWITCH", "Bool", new_xtie_switch_pos_fsx)
-fs2020_variable_subscribe("AVIONICS MASTER SWITCH", "Bool", new_xtie_switch_pos_fsx)
 -- END X-TIE SWITCH
 
 -- IGNITION KEY
@@ -591,15 +430,26 @@ fs2020_variable_subscribe("RECIP ENG LEFT MAGNETO:1", "Bool",
                           "GENERAL ENG STARTER:1", "Bool", new_ignition_fsx)                       
 -- END IGNITION KEY
 
-hw_switch_FuelPump = hw_switch_add("ARDUINO_MEGA2560_B_A0", fuel_pump_click_callback)
-hw_switch_beacon = hw_switch_add("ARDUINO_MEGA2560_B_A2", beacon_click_callback)
-hw_switch_landing = hw_switch_add("ARDUINO_MEGA2560_B_A3", landing_click_callback)
-hw_switch_taxi = hw_switch_add("ARDUINO_MEGA2560_B_A4", taxi_click_callback)
-hw_switch_nav = hw_switch_add("ARDUINO_MEGA2560_B_A5", nav_click_callback)
-hw_switch_strobe = hw_switch_add("ARDUINO_MEGA2560_B_A7", strobe_click_callback)
-hw_switch_pitot = hw_switch_add("ARDUINO_MEGA2560_B_A6", pitot_click_callback)
+hw_switch_FuelPump = hw_switch_add("switch_fuel", 1, switch_fuel)
+hw_switch_beacon = hw_switch_add("switch_beacon", 1, switch_beacon)
+hw_switch_landing = hw_switch_add("switch_landing", 1, switch_landing)
+hw_switch_taxi = hw_switch_add("switch_taxi", 1, switch_taxi)
+hw_switch_nav = hw_switch_add("switch_nav", 1, switch_nav)
+hw_switch_strobe = hw_switch_add("switch_strobe", 1, switch_strobe)
+hw_switch_pitot = hw_switch_add("switch_pitot", 1, switch_pitot)
+hw_switch_avion = hw_switch_add("switch_avion", 1, switch_avion)
+hw_switch_batt = hw_switch_add("switch_bat", 1, switch_bat)
+--hw_Button_ing = hw_button_add("Button Ingite", xxxxxxxxxxxxxxx, buttonrelease)
 
-
+outp1 = hw_output_add("LED for Switch fuel", false)
+outp2 = hw_output_add("LED for Switch beacon", false)
+outp3 = hw_output_add("LED for Switch landing", false)
+outp4 = hw_output_add("LED for Switch taxi", false)
+outp5 = hw_output_add("LED for Switch nav", false)
+outp6 = hw_output_add("LED for Switch strobe", false)
+outp7 = hw_output_add("ARDUINO_NANO_A_A6", false)
+outp8 = hw_output_add("ARDUINO_NANO_A_A7", false)
+outp9 = hw_output_add("ARDUINO_NANO_A_D12", false)
 
 
 
